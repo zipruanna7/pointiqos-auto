@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PointIQOS Auto 4.2</title>
+<title>PointIQOS Auto 4.3</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,700&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -103,7 +103,7 @@
 <body>
 <div id="authGate" class="auth-gate"></div>
 <aside id="appSidebar" class="sidebar app-hidden">
-  <div class="sidebar-brand">Point<span class="brand-accent">IQOS</span> <span class="version">AUTO 4.2</span></div>
+  <div class="sidebar-brand">Point<span class="brand-accent">IQOS</span> <span class="version">AUTO 4.3</span></div>
   <nav class="tabs">
     <button class="tab active" data-tab="dashboard" onclick="setTab('dashboard')"><span class="tab-icon">📊</span>Dashboard</button>
     <button class="tab" data-tab="contacts" onclick="setTab('contacts')"><span class="tab-icon">👥</span>Contacts</button>
@@ -116,7 +116,7 @@
 <main id="appMain" class="main-shell app-hidden">
   <header>
     <div><div class="page-kicker">PointIQOS Auto</div><h1 class="page-title" id="pageTitle">Dashboard</h1><div class="page-sub" id="pageSub">Auto sales command center</div></div>
-    <div class="header-actions"><div id="authUserBadge" class="auth-user"></div><button class="btn btn-primary" onclick="openContactModal()">+ New Contact</button><button class="btn" onclick="logoutAuto()">Log Out</button></div>
+    <div class="header-actions"><div id="authUserBadge" class="auth-user"></div><button class="btn" onclick="logoutAuto()">Log Out</button></div>
   </header>
   <section id="content" class="content"></section>
 </main>
@@ -133,13 +133,13 @@ const LEGACY_KEYS=[];
 let currentUser=null;
 function normalizeEmail(v=''){return String(v||'').trim().toLowerCase()}
 function isOwner(){return currentUser?.role==='owner'}
-function renderAuthGate(){const gate=document.getElementById('authGate');if(!gate)return;gate.innerHTML=`<div class="auth-card"><div class="auth-brand">Point<span class="brand-accent">IQOS</span> <span class="version">AUTO 4.2</span></div><div class="auth-title">Log In</div><form class="auth-form" onsubmit="loginAuto(event)"><div class="field"><label>Email</label><input name="email" type="email" required autocomplete="username"></div><div class="field"><label>Password</label><input name="password" type="password" required autocomplete="current-password"></div><button class="btn btn-primary" type="submit">Log In</button><div id="authError" class="auth-error"></div></form><div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border-soft)"><button type="button" class="btn" style="width:100%" onclick="previewEnter()">👁 View without signing in (Preview)</button><div class="auth-sub" style="margin-top:8px;text-align:center">Preview opens the app locally so you can view the layout. It does not sign in to the cloud.</div></div></div>`}
+function renderAuthGate(){const gate=document.getElementById('authGate');if(!gate)return;gate.innerHTML=`<div class="auth-card"><div class="auth-brand">Point<span class="brand-accent">IQOS</span> <span class="version">AUTO 4.3</span></div><div class="auth-title">Log In</div><form class="auth-form" onsubmit="loginAuto(event)"><div class="field"><label>Email</label><input name="email" type="email" required autocomplete="username"></div><div class="field"><label>Password</label><input name="password" type="password" required autocomplete="current-password"></div><button class="btn btn-primary" type="submit">Log In</button><div id="authError" class="auth-error"></div></form><div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border-soft)"><button type="button" class="btn" style="width:100%" onclick="previewEnter()">👁 View without signing in (Preview)</button><div class="auth-sub" style="margin-top:8px;text-align:center">Preview opens the app locally so you can view the layout. It does not sign in to the cloud.</div></div></div>`}
 async function loadCurrentUser(authUser){if(!authUser){currentUser=null;return false}const {data,error}=await supabaseClient.from('profiles').select('role').eq('id',authUser.id).single();if(error||!data){console.error('Profile load failed',error);currentUser=null;return false}currentUser={id:authUser.id,email:authUser.email||'',role:data.role};return true}
 async function loginAuto(e){e.preventDefault();setAuthError('');if(!supabaseClient){return setAuthError('Cloud login is unavailable in this view. Use "View without signing in (Preview)" below.')}const fd=new FormData(e.target),email=normalizeEmail(fd.get('email')),password=String(fd.get('password')||'');const {data,error}=await supabaseClient.auth.signInWithPassword({email,password});if(error)return setAuthError(error.message||'Email or password is incorrect.');if(!await loadCurrentUser(data.user)){await supabaseClient.auth.signOut();return setAuthError('Your account does not have a PointIQOS Auto role.')}enterApp()}
 function setAuthError(msg){const el=document.getElementById('authError');if(el)el.textContent=msg}
 function enterApp(){document.getElementById('authGate')?.classList.add('hidden');document.getElementById('appSidebar')?.classList.remove('app-hidden');document.getElementById('appMain')?.classList.remove('app-hidden');updateAuthBadge();render();pullCloud().then(function(){if(cloudReady())pushCloud()})}function previewEnter(){currentUser={id:'preview',email:'preview@local',role:'owner'};if(!state.contacts||!state.contacts.length){state.contacts.unshift({id:uid(),firstName:'Sample',lastName:'Customer (delete me)',name:'Sample Customer (delete me)',phone:'(317) 555-0199',email:'sample@example.com',address:'123 Demo St, Fishers, IN 46037',vehicle:'2022 Honda CR-V',stage:'New Lead',source:'The Car Scout',notes:'',creditApp:{},coSigner:null,documents:{},createdAt:Date.now()});save()}enterApp();toast('Preview mode — local only, not signed in')}
 async function logoutAuto(){if(supabaseClient){try{await supabaseClient.auth.signOut()}catch(e){}}currentUser=null;document.getElementById('appSidebar')?.classList.add('app-hidden');document.getElementById('appMain')?.classList.add('app-hidden');document.getElementById('authGate')?.classList.remove('hidden');renderAuthGate()}
-function updateAuthBadge(){const el=document.getElementById('authUserBadge');if(!el||!currentUser)return;el.innerHTML=`<span>${esc(currentUser.email)}</span><span class="auth-role">${currentUser.role==='owner'?'Owner':'Salesperson'}</span>`}
+function updateAuthBadge(){const el=document.getElementById('authUserBadge');if(!el||!currentUser)return;el.innerHTML=`<span class="auth-role">${currentUser.role==='owner'?'Owner':'Salesperson'}</span>`}
 async function bootAuth(){renderAuthGate();if(!supabaseClient)return;try{const {data}=await supabaseClient.auth.getSession();if(data?.session?.user&&await loadCurrentUser(data.session.user))enterApp()}catch(e){console.warn('Auth boot skipped',e)}}
 function renderTeamSettings(){if(!isOwner())return `<div class="panel"><div class="panel-title">Team & Roles</div><div class="muted" style="font-size:12px;margin-top:8px">Only the Owner can manage users and roles.</div></div>`;return `<div class="panel"><div class="panel-title">Team & Roles</div><div class="muted" style="font-size:12px;margin-top:8px">Owner account is connected to Supabase. Salesperson account management will use Supabase authentication; no passwords are stored in this HTML or browser.</div><div style="margin-top:14px"><span class="auth-role">Owner</span> <strong style="font-size:13px;margin-left:8px">${esc(currentUser.email)}</strong></div></div>`}
 const STAGES=['New Lead','Credit App Sent','Credit App Completed','Approved','Come In','Needs a Co-Signer','Sold','Dead'];
